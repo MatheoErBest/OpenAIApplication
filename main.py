@@ -1,105 +1,91 @@
-import tkinter as tk
-import mysql
+from flask import Flask, render_template, request, redirect, session
+import pymysql
+import openai
 
-def addUserDB(brukernavn, passord):
+app = Flask(__name__)
+app.secret_key = 'secret_key'
+
+# Opprett forbindelse til MySQL-databasen
+def connect_to_database():
+    return pymysql.connect(host='your_host', user='your_username', password='your_password', database='your_database')
+
+# Opprett en bruker i databasen
+def add_user_to_db(username, password):
+    connection = connect_to_database()
     try:
-         # Koble til MySQL-databasen
-        connection = pymysql.connect(
-            host='your_host',
-            user='your_username',
-            password='your_password',
-            database='your_database'
-        )
-
-        # Opprett en databasekursor
-        cursor = connection.cursor()
-
-        # SQL-spørring for å legge til bruker
-        query = "INSERT INTO users (username, password) VALUES (%s, %s)"
-        cursor.execute(query, (username, password))
-
-        # Bekreft endringene
-        connection.commit()
-
-        # Lukk kursor og tilkobling
-        cursor.close()
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO users (username, password) VALUES (%s, %s)"
+            cursor.execute(sql, (username, password))
+            connection.commit()
+    finally:
         connection.close()
 
-        print("Bruker lagt til i databasen!")
+# Sjekk om brukeren er i databasen
+def user_exists(username):
+    connection = connect_to_database()
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM users WHERE username = %s"
+            cursor.execute(sql, (username,))
+            result = cursor.fetchone()
+            return result is not None
+    finally:
+        connection.close()
 
-    except Exception as e:
-        print("Feil ved tilkobling til databasen:", e)
+# Logg inn brukeren
+def login_user(username):
+    session['username'] = username
 
+# Sjekk om brukeren er logget inn
+def is_logged_in():
+    return 'username' in session
 
+# Logg ut brukeren
+def logout_user():
+    session.pop('username', None)
+
+# Innloggingsside
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Opprett et nytt vindu for innlogging
-    login_window = tk.Toplevel(root)
-    login_window.title("Logg inn")
-    login_window.geometry("300x200")
-    login_window.configure(bg="white")
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if user_exists(username):
+            login_user(username)
+            return redirect('/openai')
+        else:
+            return render_template('login.html', error='Feil brukernavn eller passord.')
+    else:
+        return render_template('login.html')
 
-    # Tekstbokser for brukernavn og passord
-    username_label = tk.Label(login_window, text="Brukernavn:")
-    username_label.pack()
-    username_entry = tk.Entry(login_window)
-    username_entry.pack()
-
-    password_label = tk.Label(login_window, text="Passord:")
-    password_label.pack()
-    password_entry = tk.Entry(login_window, show="*")  # Viser * i stedet for passordet
-    password_entry.pack()
-
-    # Opprett en tilbakeknapp
-    back_button = tk.Button(login_window, text="Tilbake", command=login_window.destroy)
-    back_button.pack()
-
-def regIDB():
-    pass
-
+# Registreringsside
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    # Opprett et nytt vindu for registrering
-    register_window = tk.Toplevel(root)
-    register_window.title("Registrer")
-    register_window.geometry("300x200")
-    register_window.configure(bg="white")
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if not user_exists(username):
+            add_user_to_db(username, password)
+            return redirect('/login')
+        else:
+            return render_template('register.html', error='Brukernavnet eksisterer allerede.')
+    else:
+        return render_template('register.html')
 
-    # Tekstbokser for brukernavn og passord
-    username_label = tk.Label(register_window, text="Brukernavn:")
-    username_label.pack()
-    username_entry = tk.Entry(register_window)
-    username_entry.pack()
+# Logg ut
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect('/login')
 
-    password_label = tk.Label(register_window, text="Passord:")
-    password_label.pack()
-    password_entry = tk.Entry(register_window, show="*")  # Viser * i stedet for passordet
-    password_entry.pack()
+# OpenAI-siden
+@app.route('/openai')
+def openai():
+    if is_logged_in():
+        # Legg til OpenAI-kode her for å kalle API og hente respons
+        return render_template('openai.html')
+    else:
+        return redirect('/login')
 
-    password_label = tk.Label(register_window, text="Bekreft Passord:")
-    password_label.pack()
-    password_entry = tk.Entry(register_window, show="*")  # Viser * i stedet for passordet
-    password_entry.pack()
-
-    reg_button = tk.Button(register_window, text="Registrer", command=regIDB)
-    reg_button.pack()
-
-    # Opprett en tilbakeknapp
-    back_button = tk.Button(register_window, text="Tilbake", command=register_window.destroy)
-    back_button.pack()
-
-# Opprett et tkinter-vindu
-root = tk.Tk()
-root.title("Open AI")
-root.geometry("400x300")
-
-root.configure(bg="white")
-
-# Opprett en knapp for innlogging
-login_button = tk.Button(root, text="Logg inn!", command=login)
-login_button.pack()
-
-# Opprett en knapp for registrering
-register_button = tk.Button(root, text="Registrer!", command=register)
-register_button.pack()
-
-# Start Tkinter-løkken
-root.mainloop()
+if __name__ == '__main__':
+    app.run(debug=True)
