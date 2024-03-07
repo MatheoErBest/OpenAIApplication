@@ -1,13 +1,11 @@
-from flask import Flask, render_template, request, redirect, session
+import tkinter as tk
+from tkinter import messagebox
 import pymysql
 import openai
 
-app = Flask(__name__)
-app.secret_key = 'secret_key'
-
 # Opprett forbindelse til MySQL-databasen
 def connect_to_database():
-    return pymysql.connect(host='your_host', user='your_username', password='your_password', database='your_database')
+    return pymysql.connect(host='172.20.128.80', user='root', password='123Akademiet', database='user')
 
 # Opprett en bruker i databasen
 def add_user_to_db(username, password):
@@ -34,58 +32,82 @@ def user_exists(username):
 
 # Logg inn brukeren
 def login_user(username):
-    session['username'] = username
+    # implementer logikk for å åpne hovedvinduet etter innlogging
+    print("Logged in as:", username)
 
-# Sjekk om brukeren er logget inn
-def is_logged_in():
-    return 'username' in session
+# Registrer en ny bruker
+def register_user(username, password):
+    if not user_exists(username):
+        add_user_to_db(username, password)
+        messagebox.showinfo("Success", "User registered successfully!")
+    else:
+        messagebox.showerror("Error", "Username already exists")
 
-# Logg ut brukeren
-def logout_user():
-    session.pop('username', None)
+# Still spørsmål til OpenAI API og vis svaret
+def ask_openai(question):
+    openai.api_key = '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'
+    response = openai.Completion.create(
+        engine="davinci",
+        prompt=question,
+        max_tokens=100
+    )
+    answer = response.choices[0].text.strip()
+    return answer
 
-# Innloggingsside
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+# GUI for innloggingsside
+class LoginApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Login")
+        
+        self.label_username = tk.Label(master, text="Username:")
+        self.label_username.pack()
+        self.entry_username = tk.Entry(master)
+        self.entry_username.pack()
+        
+        self.label_password = tk.Label(master, text="Password:")
+        self.label_password.pack()
+        self.entry_password = tk.Entry(master, show="*")
+        self.entry_password.pack()
+        
+        self.btn_login = tk.Button(master, text="Login", command=self.login)
+        self.btn_login.pack()
+
+        self.btn_register = tk.Button(master, text="Register", command=self.register)
+        self.btn_register.pack()
+
+        self.label_question = tk.Label(master, text="Ask a question:")
+        self.label_question.pack()
+        self.entry_question = tk.Entry(master)
+        self.entry_question.pack()
+
+        self.btn_ask = tk.Button(master, text="Ask", command=self.ask)
+        self.btn_ask.pack()
+
+    def login(self):
+        username = self.entry_username.get()
+        password = self.entry_password.get()
         if user_exists(username):
             login_user(username)
-            return redirect('/openai')
+            # implementer logikk for å åpne hovedvinduet etter innlogging
         else:
-            return render_template('login.html', error='Feil brukernavn eller passord.')
-    else:
-        return render_template('login.html')
+            messagebox.showerror("Error", "Invalid username or password")
 
-# Registreringsside
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if not user_exists(username):
-            add_user_to_db(username, password)
-            return redirect('/login')
-        else:
-            return render_template('register.html', error='Brukernavnet eksisterer allerede.')
-    else:
-        return render_template('register.html')
+    def register(self):
+        username = self.entry_username.get()
+        password = self.entry_password.get()
+        register_user(username, password)
 
-# Logg ut
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect('/login')
+    def ask(self):
+        question = self.entry_question.get()
+        answer = ask_openai(question)
+        messagebox.showinfo("Answer", answer)
 
-# OpenAI-siden
-@app.route('/openai')
-def openai():
-    if is_logged_in():
-        # Legg til OpenAI-kode her for å kalle API og hente respons
-        return render_template('openai.html')
-    else:
-        return redirect('/login')
+# Opprett hovedvinduet
+def main():
+    root = tk.Tk()
+    app = LoginApp(root)
+    root.mainloop()
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    main()
