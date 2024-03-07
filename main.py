@@ -45,7 +45,7 @@ def register_user(username, password):
 
 # Still spørsmål til OpenAI API og vis svaret
 def ask_openai(question):
-    openai.api_key = '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'
+    openai.api_key = 'api key'
     response = openai.Completion.create(
         engine="davinci",
         prompt=question,
