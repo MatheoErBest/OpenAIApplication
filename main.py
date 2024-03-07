@@ -5,14 +5,14 @@ import openai
 
 # Opprett forbindelse til MySQL-databasen
 def connect_to_database():
-    return pymysql.connect(host='172.20.128.80', user='root', password='123Akademiet', database='user')
+    return pymysql.connect(host='172.20.128.80', user='matheo', password='123Akademiet', database='user')
 
 # Opprett en bruker i databasen
 def add_user_to_db(username, password):
     connection = connect_to_database()
     try:
         with connection.cursor() as cursor:
-            sql = "INSERT INTO users (username, password) VALUES (%s, %s)"
+            sql = "SELECT * FROM users WHERE username = %s"
             cursor.execute(sql, (username, password))
             connection.commit()
     finally:
