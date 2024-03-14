@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk  # Legg til ttk fra tkinter for temaer
 import pymysql
 import openai
+from ttkthemes import ThemedStyle  # Importer ThemedStyle fra ttkthemes
 
 # Opprett forbindelse til MySQL-databasen
 def connect_to_database():
@@ -59,21 +61,23 @@ class LoginApp:
     def __init__(self, master):
         self.master = master
         self.master.title("Login")
-        
-        self.label_username = tk.Label(master, text="Username:")
-        self.label_username.pack()
-        self.entry_username = tk.Entry(master)
-        self.entry_username.pack()
-        
-        self.label_password = tk.Label(master, text="Password:")
-        self.label_password.pack()
-        self.entry_password = tk.Entry(master, show="*")
-        self.entry_password.pack()
-        
-        self.btn_login = tk.Button(master, text="Login", command=self.login)
-        self.btn_login.pack()
+        self.style = ThemedStyle(self.master)
+        self.style.set_theme("equilux")  # Velg tema (f.eks. "equilux")
 
-        self.btn_register = tk.Button(master, text="Register", command=self.register)
+        self.label_username = ttk.Label(master, text="Username:")
+        self.label_username.pack(pady=10)
+        self.entry_username = ttk.Entry(master)
+        self.entry_username.pack()
+
+        self.label_password = ttk.Label(master, text="Password:")
+        self.label_password.pack(pady=10)
+        self.entry_password = ttk.Entry(master, show="*")
+        self.entry_password.pack()
+
+        self.btn_login = ttk.Button(master, text="Login", command=self.login)
+        self.btn_login.pack(pady=10)
+
+        self.btn_register = ttk.Button(master, text="Register", command=self.register)
         self.btn_register.pack()
 
     def login(self):
@@ -96,19 +100,22 @@ class MainApp:
     def __init__(self, username):
         self.root = tk.Tk()
         self.root.title("Main Window")
+        self.style = ThemedStyle(self.root)
+        self.style.set_theme("equilux")  # Velg tema (f.eks. "equilux")
+        self.root.geometry("400x300")
 
-        self.label_username = tk.Label(self.root, text="Logged in as: " + username)
-        self.label_username.pack()
+        self.label_username = ttk.Label(self.root, text="Logged in as: " + username)
+        self.label_username.pack(pady=10)
 
-        self.label_question = tk.Label(self.root, text="Ask a question:")
+        self.label_question = ttk.Label(self.root, text="Ask a question:")
         self.label_question.pack()
-        self.entry_question = tk.Entry(self.root)
+        self.entry_question = ttk.Entry(self.root)
         self.entry_question.pack()
 
-        self.btn_ask = tk.Button(self.root, text="Ask", command=self.ask)
-        self.btn_ask.pack()
+        self.btn_ask = ttk.Button(self.root, text="Ask", command=self.ask)
+        self.btn_ask.pack(pady=10)
 
-        self.btn_fullscreen = tk.Button(self.root, text="Toggle Fullscreen", command=self.toggle_fullscreen)
+        self.btn_fullscreen = ttk.Button(self.root, text="Toggle Fullscreen", command=self.toggle_fullscreen)
         self.btn_fullscreen.pack()
 
         self.root.mainloop()

@@ -23,4 +23,5 @@ Litt det samme som Daniel, men var litt mere usikker på om mysql serveren var s
 # Atle :
 Syntes den ser kjedelig ut, men får til alt ganske fort.
 
-
+# Alfred :
+Fikk til alt, siden han var de siste jeg teste på var det ingen ting han ville ha forandring på.
