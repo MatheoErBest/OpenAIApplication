@@ -6,7 +6,7 @@ Denne appen er en openAI applikasjon som har en loggin som sender passord og bru
 Denne skal la deg logge in for å kunne snakke i en chatbox med openai gjennom serverene.
 
 
-**Brukertesting**
+# Brukertesting
 
 Oppgaver:
 - Prøv å logge inn før du har registrert
@@ -14,10 +14,10 @@ Oppgaver:
 - Logge inn
 - Sette appen i fullscreen
 
-**Daniel**:
+# Daniel:
 Fikk til alt, syntes det var lett, men det var ganske kjedelig å se på.
 
-** Odin **:
+# Odin :
 Litt det samme som Daniel, men var litt mere usikker på om mysql serveren var så sikker som er forståelig. Fåreslo å gjøre appen litt finere å se på.
 
 * 
