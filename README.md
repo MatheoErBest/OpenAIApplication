@@ -20,4 +20,7 @@ Fikk til alt, syntes det var lett, men det var ganske kjedelig å se på.
 # Odin :
 Litt det samme som Daniel, men var litt mere usikker på om mysql serveren var så sikker som er forståelig. Fåreslo å gjøre appen litt finere å se på.
 
-* 
+# Atle :
+Syntes den ser kjedelig ut, men får til alt ganske fort.
+
+
